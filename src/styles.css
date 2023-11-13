@@ -1,0 +1,41 @@
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 150px;
+  /* background-color: DodgerBlue; */
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction:row
+}
+
+.pick-piece {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.add-piece-button {
+  background-color: #979090;
+  width: 50px;
+  margin: 10px;
+  text-align: center;
+  /* line-height: 75px; */
+  /* font-size: 30px; */
+}
+
+.add-arrow {
+  background-color: #979090;
+  width: 50px;
+  height: 50px;
+  margin: 10px;
+  text-align: center;
+  /* line-height: 75px; */
+  /* font-size: 30px; */
+}
+
+/* .add-piece-button > img {
+  width: 60px;
+} */

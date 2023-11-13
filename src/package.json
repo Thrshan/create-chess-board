@@ -1,0 +1,16 @@
+{
+  "name": "elegant-hotel-kick-gis6y",
+  "productName": "elegant-hotel-kick-gis6y",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "./main.js",
+  "version": "1.0.0",
+  "author": "thrsh",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "26.2.2"
+  }
+}

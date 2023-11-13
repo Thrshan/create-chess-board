@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <link href="./styles.css" rel="stylesheet">
+    <title>Chess board</title>
+  </head>
+  <body>
+    <div class="container">
+      <div><canvas id="canvas-board"></canvas></div>
+      <div class="pick-piece">
+        <div class="flex-container">
+          <div class="add-piece-button" name="DB"><img src="./assets/pieces_classic/DB.svg" name="DB" alt="Dark Bishop"/></div>
+          <div class="add-piece-button" name="DK"><img src="./assets/pieces_classic/DK.svg" name="DK" alt="Dark King"/></div>
+          <div class="add-piece-button" name="DN"><img src="./assets/pieces_classic/DN.svg" name="DN" alt="Dark Knight"/></div>
+          <div class="add-piece-button" name="DP"><img src="./assets/pieces_classic/DP.svg" name="DP" alt="Dark Pawn"/></div>
+          <div class="add-piece-button" name="DQ"><img src="./assets/pieces_classic/DQ.svg" name="DQ" alt="Dark Queen"/></div>
+          <div class="add-piece-button" name="DR"><img src="./assets/pieces_classic/DR.svg" name="DR" alt="Dark Rook"/></div>
+          <div class="add-piece-button" name="LB"><img src="./assets/pieces_classic/LB.svg" name="LB" alt="Light Bishop"/></div>
+          <div class="add-piece-button" name="LK"><img src="./assets/pieces_classic/LK.svg" name="LK" alt="Light King"/></div>
+          <div class="add-piece-button" name="LN"><img src="./assets/pieces_classic/LN.svg" name="LN" alt="Light Knight"/></div>
+          <div class="add-piece-button" name="LP"><img src="./assets/pieces_classic/LP.svg" name="LP" alt="Light Pawn"/></div>
+          <div class="add-piece-button" name="LQ"><img src="./assets/pieces_classic/LQ.svg" name="LQ" alt="Light Queen"/></div>
+          <div class="add-piece-button" name="LR"><img src="./assets/pieces_classic/LR.svg" name="LR" alt="Light Rook"/></div>
+          <div class="add-arrow" state="off" color="rgb(243, 21, 89, 0.8)">R</div>
+          <div class="add-arrow" state="off" color="rgb(255, 176, 127, 0.9)">G</div>
+          </div>
+      </div>
+    </div>
+
+    
+
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+  </body>
+</html>
