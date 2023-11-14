@@ -10,10 +10,14 @@ const canvas = document.getElementById("canvas-board");
 const GRID_SIZE = 64;
 const board_height = GRID_SIZE * 8;
 const board_width = GRID_SIZE * 8;
-const FILE_LABEL_HEIGHT = 10;
-const RANK_LABEL_WIDTH = 20;
-canvas.width = board_width + RANK_LABEL_WIDTH;
-canvas.height = board_height + FILE_LABEL_HEIGHT;
+const FILE_LABEL_HEIGHT = 25;
+const RANK_LABEL_WIDTH = 25;
+const TOP_BOARD_MARGIN = 0;
+const BOTTOM_BOARD_MARGIN = FILE_LABEL_HEIGHT;
+const LEFT_BOARD_MARGIN = RANK_LABEL_WIDTH;
+const RIGHT_BOARD_MARGIN = 0;
+canvas.width = board_width + LEFT_BOARD_MARGIN + RIGHT_BOARD_MARGIN;
+canvas.height = board_height + TOP_BOARD_MARGIN + BOTTOM_BOARD_MARGIN;
 
 var ctx = canvas.getContext('2d');
 const initPositionDict = {
@@ -41,7 +45,7 @@ let squares = new Object();
 
 for (var i = 0; i < 8; i++) {
     for (var j = 0; j < 8; j++) {
-        squares[String.fromCharCode(65+i) + (8-j)] = {'X':(i*GRID_SIZE) + RANK_LABEL_WIDTH, 'Y':(j*GRID_SIZE) + FILE_LABEL_HEIGHT};
+        squares[String.fromCharCode(65+i) + (8-j)] = {'X':(i*GRID_SIZE) + LEFT_BOARD_MARGIN, 'Y':(j*GRID_SIZE) + TOP_BOARD_MARGIN};
     }
 }
 function isPointInsideArea(point, areaPoints) {
@@ -77,7 +81,7 @@ class State {
 
 
 function create_board() {
-    ctx.fillStyle = 'rgb(155, 155, 155)';
+    ctx.fillStyle = 'rgb(250, 250, 250)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     for (var x = 0; x < board_height; x += GRID_SIZE) {
@@ -90,9 +94,59 @@ function create_board() {
                 ctx.fillStyle = 'rgb(181, 136, 99)';
             }
 
-            ctx.fillRect(RANK_LABEL_WIDTH + y, FILE_LABEL_HEIGHT + x, GRID_SIZE, GRID_SIZE);
+            ctx.fillRect(LEFT_BOARD_MARGIN + y, TOP_BOARD_MARGIN + x, GRID_SIZE, GRID_SIZE);
         }
     }
+
+
+    ctx.font="bold 20px Calibri";
+    ctx.textAlign="center"; 
+    ctx.textBaseline = "middle";
+
+    let rectFill = null;
+    let rectStroke = null;
+    let textFill = null;
+
+    for (var i = 0; i < 8; i++) {
+        if (i % 2 == 0){
+            rectFill = '#FFFFFF';
+            rectStroke = "#000000";
+            textFill = "#000000";
+        } else {
+            rectFill = '#000000';
+            rectStroke = "#000000";
+            textFill = "#FFFFFF";
+        }
+        ctx.fillStyle = rectFill;
+        ctx.strokeStyle = rectStroke;
+        ctx.fillRect(0, i * GRID_SIZE, LEFT_BOARD_MARGIN, GRID_SIZE);
+        ctx.strokeRect(0, i * GRID_SIZE, LEFT_BOARD_MARGIN, GRID_SIZE);
+        
+        const rank = 8-i
+        ctx.fillStyle = textFill;
+        ctx.fillText(rank, 0+(LEFT_BOARD_MARGIN/2),(i * GRID_SIZE)+(GRID_SIZE/2));
+    }
+
+    for (var i = 0; i < 8; i++) {
+        if (i % 2 != 0){
+            rectFill = '#FFFFFF';
+            rectStroke = "#000000";
+            textFill = "#000000";
+        } else {
+            rectFill = '#000000';
+            rectStroke = "#000000";
+            textFill = "#FFFFFF";
+        }
+        ctx.fillStyle = rectFill;
+        ctx.strokeStyle = rectStroke;
+        ctx.fillRect(LEFT_BOARD_MARGIN + (i * GRID_SIZE), board_height, GRID_SIZE, FILE_LABEL_HEIGHT);
+        ctx.strokeRect(LEFT_BOARD_MARGIN + (i * GRID_SIZE), board_height, GRID_SIZE, FILE_LABEL_HEIGHT);
+        
+        const file = String.fromCharCode(i + 65);
+        ctx.fillStyle = textFill;
+        ctx.fillText(file, (LEFT_BOARD_MARGIN + (i * GRID_SIZE)) + (GRID_SIZE/2), board_height+(FILE_LABEL_HEIGHT/2) + 1);
+    }
+
 }
 
 class Piece {
@@ -306,7 +360,6 @@ class ArrowGroup{
         this.arrows.splice(i, 1);
         return res;
     }
-
 }
 
 let pieceImgObj = new Object
@@ -342,13 +395,12 @@ function animate(){
     arrowGroup.draw();
 }
 
-
 function onMouseDown(event) {
     if (!State.addPiece && !State.addArrowEnabled){
         if (event.button === 0){
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
-            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
+            const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
+            const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
 
             const rankNo = 8 - Math.floor(posY / 64);
@@ -367,8 +419,8 @@ function onMouseDown(event) {
             }
         } else if (event.button === 2) {
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
-            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
+            const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
+            const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
 
             const rankNo = 8 - Math.floor(posY / 64);
@@ -381,8 +433,8 @@ function onMouseDown(event) {
     } else if (State.addArrowEnabled) {
         State.isAddArrow = true;
         const rect = canvas.getBoundingClientRect();
-        const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
-        const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
+        const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
+        const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
         const rankNo = 8 - Math.floor(posY / 64);
         const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
@@ -404,8 +456,8 @@ function onMouseMove(event){
 
         } else if (State.isAddArrow) {
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
-            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
+            const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
+            const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
              
             const rankNo = 8 - Math.floor(posY / 64);
             const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
@@ -428,8 +480,8 @@ function onMouseUp(event){
         if (State.isDragging || State.addPiece){
             
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
-            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
+            const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
+            const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
 
             const rankNo = 8 - Math.floor(posY / 64);
@@ -459,8 +511,6 @@ function onMouseUp(event){
         }
     }
 }
-
-
 
 canvas.addEventListener('mousedown', (event) => onMouseDown(event));
 canvas.addEventListener('mousemove', (event) => onMouseMove(event));
@@ -519,8 +569,75 @@ function addArrow(e){
     }
 }
 
+const copyBtnElem = document.getElementById("copy-button");
+
+copyBtnElem.addEventListener('click', copyImageToClipboard);
+
+function copyImageToClipboard() {
+
+    // var tempCanvas = document.createElement('canvas');
+    // tempCanvas.width = 372;
+    // tempCanvas.height = 372;
+    // var tempCtx = tempCanvas.getContext('2d');
+
+    // // Draw the content from the original canvas to the temporary canvas with resizing
+    // tempCtx.drawImage(canvas, 0, 0, 372, 372);
+
+    // tempCanvas.toBlob(function (blob) {
+    canvas.toBlob(function (blob) {
+        navigator.clipboard.write([
+            new ClipboardItem({
+                'image/png': blob
+            })
+        ]).then(function () {
+            alert('Image copied to clipboard. You can now paste it into notes or other applications.');
+        }).catch(function (error) {
+            console.error('Copy to clipboard failed: ', error);
+            alert('Copy to clipboard failed. Please use manual methods to copy the image.');
+        });
+    });
+}
+
+function saveImage() {
+    canvas.toBlob(function (blob) {
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'chessboard.png'; // Specify the file name and extension
+        link.click();
+    });
+}
 
 
 
 
+// function resizeCanvas() {
+//     // Create a temporary canvas for resizing
+//     var tempCanvas = document.createElement('canvas');
+//     tempCanvas.width = 100;
+//     tempCanvas.height = 100;
+//     var tempCtx = tempCanvas.getContext('2d');
 
+//     // Draw the content from the original canvas to the temporary canvas with resizing
+//     tempCtx.drawImage(canvas, 0, 0, 100, 100);
+
+//     // Convert the temporary canvas to a data URL
+//     var dataURL = tempCanvas.toDataURL('image/png');
+
+//     // Create a link element
+//     var downloadLink = document.createElement('a');
+
+//     // Set the href attribute with the data URL
+//     downloadLink.href = dataURL;
+
+//     // Set the download attribute with the desired file name
+//     downloadLink.download = 'resized_image.png';
+
+//     // Append the link to the body
+//     document.body.appendChild(downloadLink);
+
+//     // Programmatically click the link to trigger the download
+//     downloadLink.click();
+
+//     // Remove the link from the body
+//     document.body.removeChild(downloadLink);
+// }
