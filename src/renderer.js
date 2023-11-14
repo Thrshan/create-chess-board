@@ -7,11 +7,15 @@
  */
 
 const canvas = document.getElementById("canvas-board");
-canvas.width = 512;
-canvas.height = 512;
+const GRID_SIZE = 64;
+const board_height = GRID_SIZE * 8;
+const board_width = GRID_SIZE * 8;
+const FILE_LABEL_HEIGHT = 10;
+const RANK_LABEL_WIDTH = 20;
+canvas.width = board_width + RANK_LABEL_WIDTH;
+canvas.height = board_height + FILE_LABEL_HEIGHT;
 
 var ctx = canvas.getContext('2d');
-const grid_side = 64;
 const initPositionDict = {
     D: {
         // Dark
@@ -37,7 +41,7 @@ let squares = new Object();
 
 for (var i = 0; i < 8; i++) {
     for (var j = 0; j < 8; j++) {
-        squares[String.fromCharCode(65+i) + (8-j)] = {'X':i*grid_side, 'Y':j*grid_side};
+        squares[String.fromCharCode(65+i) + (8-j)] = {'X':(i*GRID_SIZE) + RANK_LABEL_WIDTH, 'Y':(j*GRID_SIZE) + FILE_LABEL_HEIGHT};
     }
 }
 function isPointInsideArea(point, areaPoints) {
@@ -73,18 +77,12 @@ class State {
 
 
 function create_board() {
-
-    const grid_side = 64;
-    const board_height = grid_side * 8;
-    const board_width = grid_side * 8;
-    const top = 0;
-    const left = 0;
     ctx.fillStyle = 'rgb(155, 155, 155)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    for (var x = 0; x < board_height; x += grid_side) {
-        for (var y = 0; y < board_width; y += grid_side) {
-            var isDarkSquare = (Math.floor(x / grid_side) % 2 === Math.floor(y / grid_side) % 2);
+    for (var x = 0; x < board_height; x += GRID_SIZE) {
+        for (var y = 0; y < board_width; y += GRID_SIZE) {
+            var isDarkSquare = (Math.floor(x / GRID_SIZE) % 2 === Math.floor(y / GRID_SIZE) % 2);
 
             if (isDarkSquare) {
                 ctx.fillStyle = 'rgb(240, 217, 181)';
@@ -92,10 +90,9 @@ function create_board() {
                 ctx.fillStyle = 'rgb(181, 136, 99)';
             }
 
-            ctx.fillRect(left + y, top + x, grid_side, grid_side);
+            ctx.fillRect(RANK_LABEL_WIDTH + y, FILE_LABEL_HEIGHT + x, GRID_SIZE, GRID_SIZE);
         }
     }
-    // console.log(canvas.toDataURL());
 }
 
 class Piece {
@@ -115,18 +112,15 @@ class Piece {
     }
 
     move (posX, posY) {
-        // console.log("Move");
         this.currPos.X = posX;
         this.currPos.Y = posY;
     } 
 
     place (squareName) {
-        // console.log(squareName);
         this.placedPosName = squareName;
         this.currPosName = squareName;
         Object.assign(this.placedPos, squares[squareName]);
         Object.assign(this.currPos, squares[squareName]);
-        // console.log(this.currPos);
     } 
 
     // Create a function to set placement position
@@ -165,7 +159,7 @@ class Arrow {
             const arrowRectLen = arrowLen - this.arrowHeadLength + this.lengthEmphasis;
             const arrowHorizComponentLen = Math.sqrt(Math.pow((startPos.X - horizEndPosComponent.X), 2) + Math.pow((startPos.Y - horizEndPosComponent.Y), 2))
             let angle = Math.acos(arrowHorizComponentLen / arrowLen);
-            ctx.translate(startPos.X + (grid_side/2), startPos.Y + (grid_side/2));
+            ctx.translate(startPos.X + (GRID_SIZE/2), startPos.Y + (GRID_SIZE/2));
             if (endPos.X < startPos.X && endPos.Y > startPos.Y){
                 angle = angle + (2* ((Math.PI / 2) - angle));
             } else if (endPos.X <= startPos.X && endPos.Y <= startPos.Y){
@@ -191,18 +185,15 @@ class Arrow {
     }
 
     move (posX, posY) {
-        // console.log("Move");
         this.currPos.X = posX;
         this.currPos.Y = posY;
     } 
 
     place (squareName) {
-        // console.log(squareName);
         this.placedPosName = squareName;
         this.currPosName = squareName;
         Object.assign(this.placedPos, squares[squareName]);
         Object.assign(this.currPos, squares[squareName]);
-        // console.log(this.currPos);
     } 
 
     setArrowEnd (endSquare) {
@@ -271,10 +262,10 @@ class ArrowGroup{
             Object.assign(A, squares[arrow.startSquare]);
             let B = Object();
             Object.assign(B, squares[arrow.endSquare]);
-            A.X = A.X + (grid_side/2);
-            B.X = B.X + (grid_side/2);
-            A.Y = A.Y + (grid_side/2)+0.00001;
-            B.Y = B.Y + (grid_side/2);
+            A.X = A.X + (GRID_SIZE/2);
+            B.X = B.X + (GRID_SIZE/2);
+            A.Y = A.Y + (GRID_SIZE/2)+0.00001;
+            B.Y = B.Y + (GRID_SIZE/2);
             // const f = (x) => ((x-A.X)*(B.Y - A.Y)/(B.X - A.X)) + A.Y;
             const m = (B.Y - A.Y) / (B.X - A.X);
             const Pm = -1/m;
@@ -353,23 +344,20 @@ function animate(){
 
 
 function onMouseDown(event) {
-    // console.log(event);
     if (!State.addPiece && !State.addArrowEnabled){
         if (event.button === 0){
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left;
-            const posY = event.clientY - rect.top;
+            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
+            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
 
 
             const rankNo = 8 - Math.floor(posY / 64);
             const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
             let squareName = fileChar+rankNo;
-            // console.log(squareName);
 
 
             State.selectedPiece = piecesGroup.clickedPiece(squareName);
             if (State.selectedPiece) {
-                // console.log(State.selectedPiece.pieceCode);
                 State.isDragging = true;
 
                 State.mouseDownPieceOffsetPos = {
@@ -379,25 +367,22 @@ function onMouseDown(event) {
             }
         } else if (event.button === 2) {
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left;
-            const posY = event.clientY - rect.top;
+            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
+            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
 
 
             const rankNo = 8 - Math.floor(posY / 64);
             const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
             let squareName = fileChar+rankNo;
-            // console.log(squareName);
             const res = arrowGroup.removeSelectedArrow ();
             if (res == 1) return;
             piecesGroup.removePiece(squareName);
         }
     } else if (State.addArrowEnabled) {
         State.isAddArrow = true;
-        console.log("Add arrow");
         const rect = canvas.getBoundingClientRect();
-        const posX = event.clientX - rect.left;
-        const posY = event.clientY - rect.top;
-
+        const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
+        const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
 
         const rankNo = 8 - Math.floor(posY / 64);
         const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
@@ -409,7 +394,6 @@ function onMouseDown(event) {
 }
 
 function onMouseMove(event){
-
     if (event.button === 0){
         if(State.isDragging || State.addPiece){
             const rect = canvas.getBoundingClientRect();
@@ -420,10 +404,9 @@ function onMouseMove(event){
 
         } else if (State.isAddArrow) {
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left;
-            const posY = event.clientY - rect.top;
-            
-            
+            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
+            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
+             
             const rankNo = 8 - Math.floor(posY / 64);
             const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
             let squareName = fileChar+rankNo;
@@ -434,12 +417,9 @@ function onMouseMove(event){
             const rect = canvas.getBoundingClientRect();
             const posX = event.clientX - rect.left;
             const posY = event.clientY - rect.top;
-            const selectArrow = arrowGroup.mouseOnArrow(posX, posY);
-            // console.log(selectArrow);
+            arrowGroup.mouseOnArrow(posX, posY);
             
         }
-            
-        
     }   
 }
 
@@ -447,10 +427,9 @@ function onMouseUp(event){
     if (event.button === 0){
         if (State.isDragging || State.addPiece){
             
-            // console.log("Up");
             const rect = canvas.getBoundingClientRect();
-            const posX = event.clientX - rect.left;
-            const posY = event.clientY - rect.top;
+            const posX = event.clientX - rect.left - RANK_LABEL_WIDTH;
+            const posY = event.clientY - rect.top - FILE_LABEL_HEIGHT;
 
 
             const rankNo = 8 - Math.floor(posY / 64);
@@ -460,7 +439,6 @@ function onMouseUp(event){
 
             const isPieceAtSquare = piecesGroup.clickedPiece(squareName);
             if (isPieceAtSquare === null){
-                console.log("Place");
                 State.selectedPiece.place(squareName);
             } else {
                 if (State.addPiece){
@@ -469,7 +447,6 @@ function onMouseUp(event){
                     State.selectedPiece.place(State.selectedPiece.placedPosName);
                 }
 
-                // console.log("Here");
                 // State.selectedPiece.place(State.selectedPiece.placedPosName);
             }
             State.selectedPiece = null;
