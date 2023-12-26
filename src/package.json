@@ -9,8 +9,7 @@
   "scripts": {
     "start": "electron ."
   },
-  "dependencies": {},
   "devDependencies": {
-    "electron": "26.2.2"
+    "electron": "^26.6.3"
   }
 }

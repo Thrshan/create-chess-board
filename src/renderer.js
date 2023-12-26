@@ -48,6 +48,7 @@ for (var i = 0; i < 8; i++) {
         squares[String.fromCharCode(65+i) + (8-j)] = {'X':(i*GRID_SIZE) + LEFT_BOARD_MARGIN, 'Y':(j*GRID_SIZE) + TOP_BOARD_MARGIN};
     }
 }
+
 function isPointInsideArea(point, areaPoints) {
     var v0 = { x: areaPoints[1].x - areaPoints[0].x, y: areaPoints[1].y - areaPoints[0].y };
     var v1 = { x: areaPoints[3].x - areaPoints[0].x, y: areaPoints[3].y - areaPoints[0].y };
@@ -570,8 +571,9 @@ function addArrow(e){
 }
 
 const copyBtnElem = document.getElementById("copy-button");
-
 copyBtnElem.addEventListener('click', copyImageToClipboard);
+
+
 
 function copyImageToClipboard() {
 
@@ -607,37 +609,102 @@ function saveImage() {
     });
 }
 
+const snapPreviewContElem = document.getElementById("stack-boaeds-preview");
+const snapBtnElem = document.getElementById("snap-shot-board");
+const safeGifBtnElem = document.getElementById("save-gif");
+snapBtnElem.addEventListener('click', snapBoard);
+safeGifBtnElem.addEventListener('click', saveGif);
+let board_blob_snaps = [];
+// var urlCreator = window.URL || window.webkitURL;
+var encoder = new GIFEncoder();
+encoder.setRepeat(0); //0  -> loop forever
+encoder.setDelay(500)
+encoder.start();
+function snapBoard() {
+
+
+    // canvas.toBlob(function (blob) {
+    //     board_blob_snaps.push(blob);
+    //     var imageElem = document.createElement("img");
+    //     imageElem.src = URL.createObjectURL(board_blob_snaps[0]);
+    //     snapPreviewContElem.appendChild(imageElem);
+    // });
+
+    // var imageElem = document.createElement("img");
+    // imageElem.height=100;
+    // imageElem.width=100;
+    // imageElem.src = getCanvasImage();
+    
+
+
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 200;
+    tempCanvas.height = 200;
+    var tempCtx = tempCanvas.getContext('2d');
+
+    // Draw the content from the original canvas to the temporary canvas with resizing
+    tempCtx.drawImage(canvas, 0, 0, 200, 200);
+    
+    encoder.addFrame(tempCtx)
+    tempCanvas.toBlob(function (blob) {
+    //         board_blob_snaps.push(blob);
+            var imageElem = document.createElement("img");
+            imageElem.height=100;
+            imageElem.width=100;
+            imageElem.src = URL.createObjectURL(blob);
+            snapPreviewContElem.appendChild(imageElem);
+        });
+
+
+    // board_blob_snaps.forEach(blob => {
+    //         var imageElem = document.createElement("img");
+    //         imageElem.height=100;
+    //         imageElem.width=100;
+    //         imageElem.src = URL.createObjectURL(blob);
+    //         snapPreviewContElem.appendChild(imageElem);
+    // });
+}
+function saveGif(){
+    encoder.finish();
+    // var binary_gif = encoder.stream().getData() //notice this is different from the as3gif package!
+    // var data_url = 'data:image/gif;base64,'+encode64(binary_gif);
+    encoder.download("download.gif");
+}
 
 
 
-// function resizeCanvas() {
-//     // Create a temporary canvas for resizing
-//     var tempCanvas = document.createElement('canvas');
-//     tempCanvas.width = 100;
-//     tempCanvas.height = 100;
-//     var tempCtx = tempCanvas.getContext('2d');
+function getCanvasImage() {
+    // Create a temporary canvas for resizing
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 200;
+    tempCanvas.height = 200;
+    var tempCtx = tempCanvas.getContext('2d');
 
-//     // Draw the content from the original canvas to the temporary canvas with resizing
-//     tempCtx.drawImage(canvas, 0, 0, 100, 100);
+    // Draw the content from the original canvas to the temporary canvas with resizing
+    tempCtx.drawImage(canvas, 0, 0, 200, 200);
 
-//     // Convert the temporary canvas to a data URL
-//     var dataURL = tempCanvas.toDataURL('image/png');
+    // Convert the temporary canvas to a data URL
+    var dataURL = tempCanvas.toDataURL('image/png');
 
-//     // Create a link element
-//     var downloadLink = document.createElement('a');
+    //document.body.removeChild(tempCanvas);
 
-//     // Set the href attribute with the data URL
-//     downloadLink.href = dataURL;
+    return dataURL;
+    // // Create a link element
+    // var downloadLink = document.createElement('a');
 
-//     // Set the download attribute with the desired file name
-//     downloadLink.download = 'resized_image.png';
+    // // Set the href attribute with the data URL
+    // downloadLink.href = dataURL;
 
-//     // Append the link to the body
-//     document.body.appendChild(downloadLink);
+    // // Set the download attribute with the desired file name
+    // downloadLink.download = 'resized_image.png';
 
-//     // Programmatically click the link to trigger the download
-//     downloadLink.click();
+    // // Append the link to the body
+    // document.body.appendChild(downloadLink);
 
-//     // Remove the link from the body
-//     document.body.removeChild(downloadLink);
-// }
+    // // Programmatically click the link to trigger the download
+    // downloadLink.click();
+
+    // // Remove the link from the body
+    // document.body.removeChild(downloadLink);
+}
+

@@ -39,3 +39,12 @@
 /* .add-piece-button > img {
   width: 60px;
 } */
+
+.stack-boaeds-preview-container{
+  width: 500px;
+  height: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction:column;
+  background-color: beige;
+}

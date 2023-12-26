@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:;">
     <link href="./styles.css" rel="stylesheet">
     <title>Chess board</title>
   </head>
@@ -30,11 +30,18 @@
       </div>
     </div>
     <button id="copy-button">Copy</button>
+    <button id="snap-shot-board">Snap</button>
+    <button id="save-gif">GIF</button>
+    <div id="stack-boaeds-preview" class="stack-boaeds-preview-container"></div>
 
     
 
 
     <!-- You can also require other files to run in this process -->
+    <script type="text/javascript" src="LZWEncoder.js"></script>
+    <script type="text/javascript" src="NeuQuant.js"></script>
+    <script type="text/javascript" src="GIFEncoder.js"></script>
+    <script type="text/javascript" src="b64.js"></script>
     <script src="./renderer.js"></script>
   </body>
 </html>
