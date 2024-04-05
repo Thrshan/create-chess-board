@@ -3,13 +3,22 @@
   "productName": "elegant-hotel-kick-gis6y",
   "description": "My Electron application description",
   "keywords": [],
-  "main": "./main.js",
+  "main": "main.js",
   "version": "1.0.0",
   "author": "thrsh",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^26.6.3"
+    "electron": "^26.6.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.ChessBoardGen.App",
+    "files": [
+      "assets", "*.js", "index.html", "styles.css"
+    ]
   }
 }
