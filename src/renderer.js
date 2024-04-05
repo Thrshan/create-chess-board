@@ -20,7 +20,7 @@ canvas.width = board_width + LEFT_BOARD_MARGIN + RIGHT_BOARD_MARGIN;
 canvas.height = board_height + TOP_BOARD_MARGIN + BOTTOM_BOARD_MARGIN;
 
 var ctx = canvas.getContext('2d');
-const initPositionDict = {
+const initPositionWhiteDict = {
     D: {
         // Dark
         B: ["C8", "F8"],
@@ -32,6 +32,27 @@ const initPositionDict = {
     },
     L: {
         // Light
+        B: ["C1", "F1"],
+        K: ["E1"],
+        N: ["B1", "G1"],
+        P: ["A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2"],
+        Q: ["D1"],
+        R: ["A1", "H1"],
+    },
+};
+
+const initPositionDarkDict = {
+    L: {
+        // Light
+        B: ["C8", "F8"],
+        K: ["E8"],
+        N: ["B8", "G8"],
+        P: ["A7", "B7", "C7", "D7", "E7", "F7", "G7", "H7"],
+        Q: ["D8"],
+        R: ["A8", "H8"],
+    },
+    D: {
+        // Dark
         B: ["C1", "F1"],
         K: ["E1"],
         N: ["B1", "G1"],
@@ -78,6 +99,8 @@ class State {
     static selectedArrow = null;
     static addArrowEnabled = false;
     static arrowProperty = {color:null};
+    static selectedInitPositionDict = initPositionWhiteDict;
+    static isWhiteDownInBoard = true;
 }
 
 
@@ -123,7 +146,7 @@ function create_board() {
         ctx.fillRect(0, i * GRID_SIZE, LEFT_BOARD_MARGIN, GRID_SIZE);
         ctx.strokeRect(0, i * GRID_SIZE, LEFT_BOARD_MARGIN, GRID_SIZE);
         
-        const rank = 8-i
+        const rank = State.isWhiteDownInBoard ? 8 - i : i + 1;
         ctx.fillStyle = textFill;
         ctx.fillText(rank, 0+(LEFT_BOARD_MARGIN/2),(i * GRID_SIZE)+(GRID_SIZE/2));
     }
@@ -143,7 +166,7 @@ function create_board() {
         ctx.fillRect(LEFT_BOARD_MARGIN + (i * GRID_SIZE), board_height, GRID_SIZE, FILE_LABEL_HEIGHT);
         ctx.strokeRect(LEFT_BOARD_MARGIN + (i * GRID_SIZE), board_height, GRID_SIZE, FILE_LABEL_HEIGHT);
         
-        const file = String.fromCharCode(i + 65);
+        const file = State.isWhiteDownInBoard ? String.fromCharCode(i + 65) : String.fromCharCode(7 - i + 65);
         ctx.fillStyle = textFill;
         ctx.fillText(file, (LEFT_BOARD_MARGIN + (i * GRID_SIZE)) + (GRID_SIZE/2), board_height+(FILE_LABEL_HEIGHT/2) + 1);
     }
@@ -263,6 +286,10 @@ class PiecesGroup{
         this.pieces = [];
     }
 
+    empty() {
+        this.pieces = [];
+    }
+
     add(piece) {
         this.pieces.push(piece);
     }
@@ -293,6 +320,14 @@ class PiecesGroup{
             }
         }
         this.pieces.splice(i, 1);
+    }
+
+    updatePositionValues() {
+        for (const piece of this.pieces) {
+            piece.currPos.X = squares[piece.currPosName].X;
+            piece.currPos.Y = squares[piece.currPosName].Y;
+        }
+
     }
 }
 
@@ -366,8 +401,10 @@ class ArrowGroup{
 let pieceImgObj = new Object
 let piecesGroup = new PiecesGroup;
 let arrowGroup = new ArrowGroup;
-async function loadAssets() {
-    let piecesCodes = ["DB", "DK", "DN", "DP", "DQ", "DR", "LB", "LK", "LN", "LP", "LQ", "LR"]
+
+async function loadAssets(initPositionDict) {
+    piecesGroup.empty();
+    let piecesCodes = ["DB", "DK", "DN", "DP", "DQ", "DR", "LB", "LK", "LN", "LP", "LQ", "LR"];
     for (const pieceCode of piecesCodes) {
         let img = new Image();
         img.src = `./assets/pieces_classic/${pieceCode}.svg`
@@ -378,10 +415,11 @@ async function loadAssets() {
         const pieceType = pieceCode[1];
         for (const place_pos_name of initPositionDict[pieceColor][pieceType]) {
             piecesGroup.add(new Piece(pieceCode, img, place_pos_name))
+        }
     }
 }
-}
-const promise = loadAssets();
+
+const promise = loadAssets(State.selectedInitPositionDict);
 create_board()
 
 promise.then( () => {
@@ -403,12 +441,10 @@ function onMouseDown(event) {
             const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
             const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
-
-            const rankNo = 8 - Math.floor(posY / 64);
-            const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
+            const rankNo = State.isWhiteDownInBoard? 8 - Math.floor(posY / 64): 1 + Math.floor(posY / 64);
+            const fileChar = State.isWhiteDownInBoard? String.fromCharCode(Math.floor(posX / 64) + 65) : String.fromCharCode((7 - Math.floor(posX / 64)) + 65);
             let squareName = fileChar+rankNo;
-
-
+            console.log(squareName);
             State.selectedPiece = piecesGroup.clickedPiece(squareName);
             if (State.selectedPiece) {
                 State.isDragging = true;
@@ -424,9 +460,10 @@ function onMouseDown(event) {
             const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
 
-            const rankNo = 8 - Math.floor(posY / 64);
-            const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
+            const rankNo = State.isWhiteDownInBoard? 8 - Math.floor(posY / 64): 1 + Math.floor(posY / 64);
+            const fileChar = State.isWhiteDownInBoard? String.fromCharCode(Math.floor(posX / 64) + 65) : String.fromCharCode((7 - Math.floor(posX / 64)) + 65);
             let squareName = fileChar+rankNo;
+
             const res = arrowGroup.removeSelectedArrow ();
             if (res == 1) return;
             piecesGroup.removePiece(squareName);
@@ -437,8 +474,8 @@ function onMouseDown(event) {
         const posX = event.clientX - rect.left - LEFT_BOARD_MARGIN;
         const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
-        const rankNo = 8 - Math.floor(posY / 64);
-        const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
+        const rankNo = State.isWhiteDownInBoard? 8 - Math.floor(posY / 64): 1 + Math.floor(posY / 64);
+        const fileChar = State.isWhiteDownInBoard? String.fromCharCode(Math.floor(posX / 64) + 65) : String.fromCharCode((7 - Math.floor(posX / 64)) + 65);
         let squareName = fileChar+rankNo;
         const arrow = new Arrow(squareName, State.arrowProperty.color, 1);
         arrowGroup.add(arrow);
@@ -485,8 +522,8 @@ function onMouseUp(event){
             const posY = event.clientY - rect.top - TOP_BOARD_MARGIN;
 
 
-            const rankNo = 8 - Math.floor(posY / 64);
-            const fileChar = String.fromCharCode(Math.floor(posX / 64) + 65);
+            const rankNo = State.isWhiteDownInBoard? 8 - Math.floor(posY / 64): 1 + Math.floor(posY / 64);
+            const fileChar = State.isWhiteDownInBoard? String.fromCharCode(Math.floor(posX / 64) + 65) : String.fromCharCode((7 - Math.floor(posX / 64)) + 65);
             let squareName = fileChar+rankNo;
 
 
@@ -570,13 +607,14 @@ function addArrow(e){
     }
 }
 
+const resetBtnElem = document.getElementById("reset-button");
+resetBtnElem.addEventListener('click', resetTheBoard);
+const flipBoardBtnElem = document.getElementById("flip-button");
+flipBoardBtnElem.addEventListener('click', flipTheBoard);
 const copyBtnElem = document.getElementById("copy-button");
 copyBtnElem.addEventListener('click', copyImageToClipboard);
 
-
-
 function copyImageToClipboard() {
-
     // var tempCanvas = document.createElement('canvas');
     // tempCanvas.width = 372;
     // tempCanvas.height = 372;
@@ -620,6 +658,7 @@ var encoder = new GIFEncoder();
 encoder.setRepeat(0); //0  -> loop forever
 encoder.setDelay(500)
 encoder.start();
+
 function snapBoard() {
 
 
@@ -708,3 +747,27 @@ function getCanvasImage() {
     // document.body.removeChild(downloadLink);
 }
 
+function resetTheBoard() {
+    loadAssets(State.selectedInitPositionDict);
+}
+
+function flipTheBoard() {
+    State.isWhiteDownInBoard = !State.isWhiteDownInBoard;
+    if (State.isWhiteDownInBoard) {
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                squares[String.fromCharCode(65+i) + (8-j)] = {'X':(i*GRID_SIZE) + LEFT_BOARD_MARGIN, 'Y':(j*GRID_SIZE) + TOP_BOARD_MARGIN};
+            }
+        }
+    } else {
+       for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                squares[String.fromCharCode(65+i) + (8-j)] = {'X':((7-i)*GRID_SIZE) + LEFT_BOARD_MARGIN, 'Y':((7-j)*GRID_SIZE) + TOP_BOARD_MARGIN};
+            }
+        } 
+    }
+    
+
+
+    piecesGroup.updatePositionValues();
+}
