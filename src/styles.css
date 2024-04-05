@@ -48,3 +48,9 @@
   flex-direction:column;
   background-color: beige;
 }
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  /* background-color: DodgerBlue; */
+}

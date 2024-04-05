@@ -18,7 +18,12 @@
   "build": {
     "appId": "com.ChessBoardGen.App",
     "files": [
-      "assets", "*.js", "index.html", "styles.css"
+      "assets",
+      "js",
+      "index.html",
+      "styles.css",
+      "main.js",
+      "renderer.js"
     ]
   }
 }
